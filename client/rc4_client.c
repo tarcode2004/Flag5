@@ -12,6 +12,8 @@ int main() {
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     int server_sock = -1;
+    // Server IP address - change this as needed
+    const char *server_ip = "127.0.0.1"; 
     // ... (Error handling omitted for brevity)
 
     // 1. Initialize OpenSSL
@@ -36,7 +38,7 @@ int main() {
     // WARNING: Insecure for production. Only for local testing with self-signed/CA cert.
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
-    // Main loop to make requests every 10 seconds
+    // Main loop to make requests every 1 second
     while(1) {
         SSL *ssl = NULL;
         int server_sock = -1;
@@ -47,13 +49,13 @@ int main() {
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
         server_addr.sin_port = htons(443);
-        inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr); // Use localhost IP
+        inet_pton(AF_INET, server_ip, &server_addr.sin_addr); // Use configured server IP
 
         if (connect(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
              perror("TCP Connect failed");
              // Close resources and continue to next iteration
              if (server_sock >= 0) close(server_sock);
-             sleep(10);
+             sleep(1);
              continue;
         }
         printf("TCP connected.\n");
@@ -69,7 +71,7 @@ int main() {
             // Clean up this connection and continue
             if (ssl) SSL_free(ssl);
             if (server_sock >= 0) close(server_sock);
-            sleep(10);
+            sleep(1);
             continue;
         }
         printf("SSL Handshake successful. Cipher: %s\n", SSL_get_cipher(ssl));
@@ -93,9 +95,9 @@ int main() {
         if (ssl) SSL_free(ssl);
         if (server_sock >= 0) close(server_sock);
         
-        // Wait for 10 seconds before next request
-        printf("Waiting 10 seconds for next request...\n");
-        sleep(10);
+        // Wait for 1 second before next request
+        printf("Waiting 1 second for next request...\n");
+        sleep(1);
     }
 
 cleanup:
