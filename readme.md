@@ -51,6 +51,24 @@ cd your-build
 ## 💻 Client Setup
 
 A test client is provided in the `client` directory to verify the vulnerability:
+
+### Quick Setup (Recommended)
+
+```bash
+cd client
+chmod +x setup_autostart.sh
+sudo ./setup_autostart.sh
+```
+
+This will automatically:
+- Install build dependencies and OpenSSL if needed
+- Compile the RC4 client
+- Configure the client to run as a service that starts on boot
+
+### Manual Setup (Only if needed)
+
+If you prefer to compile and run the client manually:
+
 ```bash
 cd client
 gcc rc4_client.c -o rc4_client \
@@ -61,7 +79,7 @@ export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
 ./rc4_client
 ```
 
-The client will connect to the server using the vulnerable RC4-SHA cipher and retrieve the satellite uplink status file.
+The client will connect to the server using the vulnerable RC4-SHA cipher and retrieve the satellite uplink status file. For more details, see the client's README.md.
 
 ---
 
