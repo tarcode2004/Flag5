@@ -1,30 +1,37 @@
-# 🛰️ RC4 Apache CTF Challenge
+# 🛰️ OmniTech Satellite Infiltration: RC4 Exploit Challenge
 
-This repository contains a Capture The Flag (CTF) challenge focusing on exploiting a deliberately vulnerable Apache server configured with deprecated cryptographic protocols. The setup creates a server using an old version of OpenSSL and configures Apache to use the vulnerable RC4 cipher.
+## 🌌 Mission Briefing
+
+**CLASSIFIED: EYES ONLY**
+
+The aging OmniTech-7 military satellite deployed in 2014 remains operational despite its outdated security protocols. Intelligence suggests this satellite is transmitting classified data using deprecated cryptographic standards. Your mission is to exploit its weak TLS implementation and intercept the classified communications.
+
+Our reconnaissance has revealed:
+* The satellite uses an obsolete ground control server running OpenSSL 1.0.2u
+* All communications are "secured" with the vulnerable RC4 cipher
+* System administrators never implemented brute-force protection for the admin portal
+* A high-value intelligence payload (the flag) is hidden within the system
+
+## 🔍 Technical Intelligence Report
+
+The OmniTech-7 ground control server specifications:
+* 📦 OpenSSL 1.0.2u (critically outdated)
+* 🌐 Apache 2.4.63 compiled against the legacy OpenSSL version
+* 🔒 HTTPS-only communications enforcing the insecure RC4-SHA cipher
+* 💡 Intelligence suggests admin credentials have zero brute-force protection
+
+This CTF challenge simulates the satellite's ground control server. Your objective: exploit the RC4 weaknesses to capture the flag.
 
 ---
 
-## 🔍 Challenge Overview
+## 🛠️ Server Deployment Instructions
 
-The challenge simulates an "**OmniTech Satellite Uplink**" server that contains a secret flag. The server uses:
-
-* 📦 OpenSSL 1.0.2u (an outdated version)
-* 🌐 Apache 2.4.63 compiled against the old OpenSSL
-* 🔒 HTTPS-only configuration with the insecure RC4-SHA cipher enforced
-* 💡 A hint in the uplink status file suggesting admin credentials have no brute-force protection
-
----
-
-## 🛠️ Server Setup
-
-The repository includes an automated build process through a series of bash scripts:
+Deploy the simulated satellite ground control server:
 
 1. Clone this repository
-2. Run the build process:
-bash
+2. Execute the deployment protocol:
 cd your-build
 ./main.sh
-
 
 ### Build Process Steps:
 
@@ -76,9 +83,6 @@ To capture the flag in this challenge:
 
 1. Analyze the RC4 cipher weakness - RC4 has known cryptographic vulnerabilities
 2. Note that the uplink status file contains an encoded string:
-   ```
-   6f5b3e8c9d2a1f7e4b0c8d9e2f5a1b7c3d9e0f5a2b7c4d8e1f5a3b9c6d0e2f7
-   ```
 3. Observe the hint about "**admin lacks brute-force protection**"
 4. Use tools like Wireshark to capture the SSL traffic and analyze the RC4 encryption
 
