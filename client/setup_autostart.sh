@@ -17,6 +17,41 @@ if [ ! -x "$CLIENT_BINARY" ]; then
   exit 1
 fi
 
+# Check if OpenSSL is installed at the expected location
+OPENSSL_PREFIX="/usr/local/ssl"
+if [ ! -d "$OPENSSL_PREFIX" ] || [ ! -f "$OPENSSL_PREFIX/lib/libssl.so" ]; then
+  echo "OpenSSL not found at $OPENSSL_PREFIX. Installing OpenSSL 1.0.2u..."
+  
+  # Create build directory
+  OPENSSL_VERSION="1.0.2u"
+  SRC_DIR=$(mktemp -d)
+  
+  # Download and extract OpenSSL
+  cd "$SRC_DIR"
+  if ! wget -q "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz"; then
+    echo "Failed to download OpenSSL. Please check your internet connection."
+    exit 1
+  fi
+  
+  tar -xzf "openssl-$OPENSSL_VERSION.tar.gz"
+  cd "openssl-$OPENSSL_VERSION"
+  
+  # Build and install OpenSSL
+  ./config --prefix="$OPENSSL_PREFIX" --openssldir="$OPENSSL_PREFIX" shared
+  make clean
+  make -j$(nproc)
+  make install_sw
+  ldconfig
+  
+  # Clean up
+  cd "$CLIENT_DIR"
+  rm -rf "$SRC_DIR"
+  
+  echo "OpenSSL $OPENSSL_VERSION has been installed to $OPENSSL_PREFIX"
+else
+  echo "OpenSSL installation found at $OPENSSL_PREFIX"
+fi
+
 # Create systemd service file
 cat > /etc/systemd/system/rc4-client.service << EOF
 [Unit]
