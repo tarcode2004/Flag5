@@ -36,7 +36,7 @@ sudo sed -i '/^MaxStartups/d' $SSHD_CONFIG
 
 # Add our permissive settings
 echo "# CTF Challenge Settings - INSECURE" | sudo tee -a $SSHD_CONFIG
-echo "MaxAuthTries 100" | sudo tee -a $SSHD_CONFIG
+echo "MaxAuthTries 10000" | sudo tee -a $SSHD_CONFIG
 echo "LoginGraceTime 120" | sudo tee -a $SSHD_CONFIG
 echo "MaxStartups 100:30:200" | sudo tee -a $SSHD_CONFIG
 echo "PermitRootLogin yes" | sudo tee -a $SSHD_CONFIG
