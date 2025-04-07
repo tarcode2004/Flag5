@@ -30,8 +30,10 @@ Deploy the simulated satellite ground control server:
 
 1. Clone this repository
 2. Execute the deployment protocol:
+```bash
 cd your-build
 ./main.sh
+```
 
 ### Build Process Steps:
 
@@ -49,7 +51,7 @@ cd your-build
 ## 💻 Client Setup
 
 A test client is provided in the `client` directory to verify the vulnerability:
-bash
+```bash
 cd client
 gcc rc4_client.c -o rc4_client \
 -I/usr/local/ssl/include \
@@ -57,7 +59,7 @@ gcc rc4_client.c -o rc4_client \
 -lssl -lcrypto -ldl -pthread
 export LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
 ./rc4_client
-
+```
 
 The client will connect to the server using the vulnerable RC4-SHA cipher and retrieve the satellite uplink status file.
 
