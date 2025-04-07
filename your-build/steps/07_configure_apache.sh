@@ -6,10 +6,13 @@ DOCUMENT_ROOT="$APACHE_PREFIX/htdocs"
 HTTPD_CONF="$APACHE_PREFIX/conf/httpd.conf"
 OPENSSL_PREFIX="/usr/local/ssl"
 
-echo "[07_configure_apache] Configuring Apache for SSL..."
+echo "[07_configure_apache] Configuring Apache for SSL only (no HTTP)..."
 
 # Ensure the SSL module is loaded.
 sudo sed -i 's/^#LoadModule ssl_module/LoadModule ssl_module/' "$HTTPD_CONF" || true
+
+# Comment out the default port 80 Listen directive
+sudo sed -i 's/^Listen 80/#Listen 80/' "$HTTPD_CONF"
 
 # Create needed directories.
 sudo mkdir -p "$DOCUMENT_ROOT" "$APACHE_LOG_DIR" "$APACHE_PREFIX/conf/extra" "$APACHE_PREFIX/conf/ssl"
