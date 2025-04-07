@@ -82,16 +82,17 @@ The client will connect to the server using the vulnerable RC4-SHA cipher and re
 To capture the flag in this challenge:
 
 1. Analyze the RC4 cipher weakness - RC4 has known cryptographic vulnerabilities
-2. Note that the uplink status file contains an encoded string:
-3. Observe the hint about "**admin lacks brute-force protection**"
+2. Note that the uplink status file contains an encoded string
+3. Observe the hint about "**admin lacks brute-force protection**" - the admin user can be accessed via SSH
 4. Use tools like Wireshark to capture the SSL traffic and analyze the RC4 encryption
+5. Consider using brute force tools like Hydra against the SSH service to access the admin account
 
 ### The vulnerability may involve:
 
 * RC4 biases in the keystream
 * Potential for plaintext recovery with enough samples
 * Weak authentication mechanisms
-* Potential for brute-forcing admin credentials
+* SSH brute force attacks against the admin user
 
 ---
 
