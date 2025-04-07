@@ -78,20 +78,20 @@ fi
 echo "  - Removing any SSH rate-limiting firewall rules"
 # Remove any REJECT rules targeting SSH port
 sudo iptables -L INPUT --line-numbers | grep "REJECT.*dpt:ssh" | \
-  awk '{print $1}' | sort -r | xargs -I {} sudo iptables -D INPUT {}
+  awk '{print $1}' | sort -r | xargs -I {} sudo iptables -D INPUT {} || true
 
 # 6. Set SSHD to accept password auth (no keys required)
-sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' $SSHD_CONFIG
-sudo sed -i 's/^#\?ChallengeResponseAuthentication.*/ChallengeResponseAuthentication yes/' $SSHD_CONFIG
+sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' $SSHD_CONFIG || true
+sudo sed -i 's/^#\?ChallengeResponseAuthentication.*/ChallengeResponseAuthentication yes/' $SSHD_CONFIG || true
 
 # 7. Create a banner warning about the insecure setup
 echo "WARNING: This system has been configured to allow brute force attacks for CTF purposes. DO NOT use in production." | \
-  sudo tee /etc/ssh/banner
-echo "Banner /etc/ssh/banner" | sudo tee -a $SSHD_CONFIG
+  sudo tee /etc/ssh/banner || true
+echo "Banner /etc/ssh/banner" | sudo tee -a $SSHD_CONFIG || true
 
 # 8. Restart SSH to apply changes
 echo "  - Restarting SSH service to apply changes"
-sudo systemctl restart ssh
+sudo systemctl restart ssh || true
 
 echo "[11_disable_brute_force_protections] Brute force protections successfully disabled!"
 echo "The system is now vulnerable to brute force attacks through SSH."
