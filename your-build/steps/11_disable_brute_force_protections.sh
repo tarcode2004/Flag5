@@ -3,6 +3,20 @@ set -euo pipefail
 
 echo "[11_disable_brute_force_protections] Disabling brute force protections for CTF..."
 
+# 0. Ensure SSH server is installed and running
+if ! dpkg -l | grep -q openssh-server; then
+    echo "  - SSH server not found, installing openssh-server..."
+    sudo apt-get update
+    sudo apt-get install -y openssh-server
+fi
+
+# Check if SSH service is running, if not start it
+if ! systemctl is-active --quiet ssh; then
+    echo "  - Starting SSH service..."
+    sudo systemctl enable ssh
+    sudo systemctl start ssh
+fi
+
 # 1. Disable fail2ban if installed
 if command -v fail2ban-client &> /dev/null; then
     echo "  - Stopping and disabling fail2ban service"
