@@ -58,13 +58,13 @@ fi
 
 # Clear any existing account lockouts
 if command -v pam_tally2 &> /dev/null; then
-    sudo pam_tally2 --reset --user root
-    sudo pam_tally2 --reset --user admin
-    sudo pam_tally2 --reset --user ubuntu
+    sudo pam_tally2 --reset --user root || true
+    sudo pam_tally2 --reset --user admin || true
+    sudo pam_tally2 --reset --user ubuntu || true
 elif command -v faillock &> /dev/null; then
-    sudo faillock --reset --user root
-    sudo faillock --reset --user admin
-    sudo faillock --reset --user ubuntu
+    sudo faillock --reset --user root || true
+    sudo faillock --reset --user admin || true
+    sudo faillock --reset --user ubuntu || true
 fi
 
 # 4. Make sure user "admin" exists with a simple password
