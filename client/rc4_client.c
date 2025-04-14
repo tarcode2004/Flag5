@@ -12,99 +12,83 @@ int main() {
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     int server_sock = -1;
-    // Server IP address - change this as needed
     const char *server_ip = "127.0.0.1"; 
-    // ... (Error handling omitted for brevity)
 
-    // 1. Initialize OpenSSL
     SSL_library_init();
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
 
-    // 2. Create SSL Context (using a method compatible with TLSv1.0/1.1/1.2)
-    ctx = SSL_CTX_new(SSLv23_client_method()); // Use SSLv23 for OpenSSL 1.0.2 compatibility
+    ctx = SSL_CTX_new(SSLv23_client_method()); 
 
-    // --- CRUCIAL PART ---
-    // 3. Set Cipher List to ONLY RC4-SHA
     if (SSL_CTX_set_cipher_list(ctx, "RC4-SHA") != 1) {
         fprintf(stderr, "Error setting cipher string\n");
         ERR_print_errors_fp(stderr);
-        // Handle error...
         goto cleanup;
     }
-    // --- END CRUCIAL PART ---
-
-    // 4. (Optional but recommended for testing) Disable certificate verification
-    // WARNING: Insecure for production. Only for local testing with self-signed/CA cert.
+    
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
-    // Main loop to make requests every 1 second
     while(1) {
         SSL *ssl = NULL;
         int server_sock = -1;
         
-        // 5. Create TCP Socket and Connect
         server_sock = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in server_addr;
         memset(&server_addr, 0, sizeof(server_addr));
         server_addr.sin_family = AF_INET;
         server_addr.sin_port = htons(443);
-        inet_pton(AF_INET, server_ip, &server_addr.sin_addr); // Use configured server IP
+        inet_pton(AF_INET, server_ip, &server_addr.sin_addr); 
 
         if (connect(server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
              perror("TCP Connect failed");
-             // Close resources and continue to next iteration
              if (server_sock >= 0) close(server_sock);
              sleep(1);
              continue;
         }
-        printf("TCP connected.\n");
+        // printf("TCP connected.\n"); // Optional: Less verbose output
 
-        // 6. Create SSL structure and associate with socket
         ssl = SSL_new(ctx);
         SSL_set_fd(ssl, server_sock);
 
-        // 7. Perform SSL Handshake
         if (SSL_connect(ssl) != 1) {
             fprintf(stderr, "SSL Handshake failed\n");
-            ERR_print_errors_fp(stderr);
-            // Clean up this connection and continue
+            // ERR_print_errors_fp(stderr); // Optional: Less verbose error
             if (ssl) SSL_free(ssl);
             if (server_sock >= 0) close(server_sock);
             sleep(1);
             continue;
         }
-        printf("SSL Handshake successful. Cipher: %s\n", SSL_get_cipher(ssl));
+        // printf("SSL Handshake successful. Cipher: %s\n", SSL_get_cipher(ssl)); // Optional
 
-        // 8. Send HTTP GET Request
-        const char *http_request = "GET /satellite_uplink_status.txt HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        // --- MODIFIED: Request the PHP script ---
+        const char *http_request = "GET /satellite_uplink_status.php HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        // --- END MODIFIED ---
+        
         SSL_write(ssl, http_request, strlen(http_request));
-        printf("HTTP Request sent.\n");
+        // printf("HTTP Request sent.\n"); // Optional
 
-        // 9. Read HTTP Response
+        // --- MODIFIED: Read HTTP Response (less verbose) ---
         char buffer[4096];
         int bytes_read;
-        printf("--- Response ---\n");
+        // printf("--- Response Line ---\n"); // Optional
         while ((bytes_read = SSL_read(ssl, buffer, sizeof(buffer) - 1)) > 0) {
             buffer[bytes_read] = 0;
-            printf("%s", buffer);
+            printf("%s", buffer); // Print raw response chunk
         }
-        printf("\n--- End Response ---\n");
+        // printf("--- End Response Line ---\n"); // Optional
+        // --- END MODIFIED ---
 
-        // Clean up for this iteration
         if (ssl) SSL_free(ssl);
         if (server_sock >= 0) close(server_sock);
         
-        // Wait for 1 second before next request
-        printf("Waiting 1 second for next request...\n");
+        // printf("Waiting 1 second...\n"); // Optional
         sleep(1);
     }
 
 cleanup:
-    // 10. Cleanup
     if (ctx) SSL_CTX_free(ctx);
     ERR_free_strings();
-    EVP_cleanup(); // Clean up algorithms
+    EVP_cleanup(); 
 
     return 0;
 }
