@@ -14,7 +14,7 @@ fi
 # Example for root user desktop: /root/Desktop/sslkeylog.log
 # Defaulting to /tmp/ for general accessibility.
 # Ensure the service (runs as root by default) has write permissions to this location.
-KEYLOG_FILE_PATH="/home/omnitech-admin/Desktop/sslkeylog.log"
+KEYLOG_FILE_PATH="/tmp/sslkeylog.log"
 echo ">>> SSL Key Log file will be saved to: $KEYLOG_FILE_PATH" # Inform the user
 # --- END MODIFICATION ---
 
@@ -197,7 +197,7 @@ After=network.target
 Type=simple
 # Set LD_LIBRARY_PATH for custom OpenSSL and SSLKEYLOGFILE for decryption
 Environment="LD_LIBRARY_PATH=$OPENSSL_PREFIX/lib:\$LD_LIBRARY_PATH"
-Environment="SSLKEYLOGFILE=$KEYLOG_FILE_PATH" # <-- MODIFIED: Added this line
+Environment="SSLKEYLOGFILE=$KEYLOG_FILE_PATH"
 # The service (running as root by default) needs write permission to $KEYLOG_FILE_PATH
 # If using a non-default path (like a user's desktop), ensure permissions are correct
 # or consider using the User= directive (e.g., User=ctfplayer) if applicable.
