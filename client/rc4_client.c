@@ -18,9 +18,9 @@ int main() {
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
 
-    ctx = SSL_CTX_new(TLSv1_2_client_method());  // Force TLSv1.2
+    ctx = SSL_CTX_new(TLSv1_2_client_method());
 
-    if (SSL_CTX_set_cipher_list(ctx, "RC4-SHA:@SECLEVEL=1") != 1) {  // Force RC4-SHA with lower security level
+    if (SSL_CTX_set_cipher_list(ctx, "RC4-SHA:RC4-MD5:@SECLEVEL=1") != 1) {
         fprintf(stderr, "Error setting cipher string\n");
         ERR_print_errors_fp(stderr);
         goto cleanup;

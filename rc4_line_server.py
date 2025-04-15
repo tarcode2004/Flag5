@@ -51,8 +51,8 @@ class RC4LineHandler(http.server.BaseHTTPRequestHandler):
 def main():
     # Create SSL context
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    # Use a more compatible cipher suite
-    context.set_ciphers('DEFAULT:@SECLEVEL=1')
+    # Explicitly allow RC4 ciphers
+    context.set_ciphers('RC4-SHA:RC4-MD5:@SECLEVEL=1')
     context.load_cert_chain(certfile=CERTFILE, keyfile=KEYFILE)
     
     # Create server
