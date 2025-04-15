@@ -18,6 +18,7 @@ export LD_LIBRARY_PATH="$OPENSSL_PREFIX/lib"
   --with-ssl="$OPENSSL_PREFIX" \
   --enable-so \
   --with-included-apr \
+  --with-mpm=prefork \
   --enable-mods-shared=reallyall
 
 make clean
