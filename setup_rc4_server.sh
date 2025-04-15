@@ -10,7 +10,7 @@ INDEX_FILE="$SCRIPT_DIR/line_index.txt" # Added for completeness
 CERT_DIR="$SCRIPT_DIR/certs"
 # --- MODIFIED: Use system Python 3 ---
 PYTHON_EXEC="python3" # Use system default Python 3
-PIP_EXEC="pip3"       # Use system default pip3
+PIP_EXEC="$PYTHON_EXEC -m pip"       # Use python3 -m pip instead
 # --- END MODIFIED ---
 
 echo "[setup_server] Stopping conflicting services..."

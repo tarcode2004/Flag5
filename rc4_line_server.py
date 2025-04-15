@@ -13,22 +13,24 @@ CERTFILE = os.path.join(SCRIPT_DIR, 'certs', 'server.crt')
 KEYFILE = os.path.join(SCRIPT_DIR, 'certs', 'server.key')
 TEXT_FILE = os.path.join(SCRIPT_DIR, 'data.txt')
 INDEX_FILE = os.path.join(SCRIPT_DIR, 'line_index.txt')
-# --- Application-level RC4 key remains the same ---
 RC4_KEY = b'CTF_KEY_12345' # Key for payload encryption
+
+# --- REMOVED Global Cipher Initialization ---
+# No shared cipher object needed if we reset for each message
 
 class RC4LineHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
+        # --- REMOVED global declaration ---
+
         if self.path != '/':
             self.send_error(404, "Not Found")
             return
 
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
-        # Optional: Remove or change the RC4 payload warning if desired
-        # self.send_header('Warning', '299 - "Using insecure RC4 cipher for payload"')
         self.end_headers()
 
-        # Read all lines from the data file
+        # Read data file (logic remains the same)
         try:
             with open(TEXT_FILE, 'r') as f:
                 lines = f.readlines()
@@ -46,7 +48,7 @@ class RC4LineHandler(http.server.BaseHTTPRequestHandler):
             print(f"Error: {TEXT_FILE} is empty")
             return
 
-        # Read the current line index (logic remains the same)
+        # Read index file (logic remains the same)
         current_line = 0
         try:
             with open(INDEX_FILE, 'r') as f:
@@ -65,26 +67,30 @@ class RC4LineHandler(http.server.BaseHTTPRequestHandler):
              print(f"Error reading {INDEX_FILE}: {e}, using index 0.")
              current_line = 0
 
-        # Ensure the index is within bounds
         current_line = current_line % len(lines)
         line = lines[current_line].strip()
 
-        # --- Application-level RC4 encryption remains the same ---
+        # --- MODIFICATION: Re-initialize Cipher for EACH request ---
         try:
+            # Create a NEW cipher instance here, resetting the state every time
+            # This uses the same *starting* keystream segment for every message.
+            # WARNING: This creates the "many-time pad" vulnerability.
             cipher = ARC4.new(RC4_KEY)
             encrypted_line = cipher.encrypt(line.encode('utf-8'))
+            print(f"Encrypted line {current_line} using RESET RC4 state.") # Debug print
         except Exception as e:
             self.wfile.write(b'Error: Encryption failed\n')
             print(f"Error encrypting line {current_line}: {e}")
             return
+        # --- END MODIFICATION ---
 
-        # Send the Base64-encoded encrypted line
+        # Send Base64 encoded data (logic remains the same)
         try:
             self.wfile.write(base64.b64encode(encrypted_line) + b'\n')
         except Exception as e:
              print(f"Error sending response to client: {e}")
 
-        # Update the line index (logic remains the same)
+        # Update index file (logic remains the same)
         next_line = (current_line + 1) % len(lines)
         try:
             with open(INDEX_FILE, 'w') as f:
@@ -94,27 +100,12 @@ class RC4LineHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
-    print("Initializing Standard TLS Line Server...")
-    # --- MODIFICATION NEEDED ---
-    # Use standard TLS context (allows negotiation, typically TLS 1.2 or 1.3)
-    # Python's default settings with a modern OpenSSL backend will support key logging.
+    # Standard TLS setup remains the same
+    print("Initializing Standard TLS Line Server with RC4 Keystream RESET per message...")
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-
-    # --- REMOVED: Do not force insecure RC4 TLS ciphers ---
-    # try:
-    #     print("Setting TLS cipher suite to enable RC4 (RC4-SHA:RC4-MD5)...")
-    #     context.set_ciphers('RC4-SHA:RC4-MD5') # REMOVED THIS LINE
-    #     print("Cipher suite set successfully.")
-    # except ssl.SSLError as e:
-    #     print(f"FATAL: Could not set RC4 cipher suite: {e}")
-    #     exit(1)
     print("Using default TLS cipher suites (key logging compatible).")
 
-    # Optionally set minimum TLS version if needed (e.g., require TLS 1.2+)
-    # context.minimum_version = ssl.TLSVersion.TLSv1_2
-    # print("Set minimum TLS version to 1.2")
-
-    # Load the certificate and private key (remains the same)
+    # Load cert/key (logic remains the same)
     try:
         print(f"Loading certificate: {CERTFILE}")
         print(f"Loading private key: {KEYFILE}")
@@ -122,14 +113,12 @@ def main():
         print("Certificate and key loaded.")
     except FileNotFoundError:
         print(f"FATAL: Certificate or key file not found.")
-        print(f"Checked locations: {CERTFILE}, {KEYFILE}")
         exit(1)
     except ssl.SSLError as e:
         print(f"FATAL: Error loading certificate/key: {e}")
         exit(1)
-    # --- END MODIFICATION ---
 
-    # Create and start the HTTPS server (remains the same)
+    # Start server (logic remains the same)
     try:
         server = http.server.HTTPServer((HOST, PORT), RC4LineHandler)
         server.socket = context.wrap_socket(server.socket, server_side=True)
@@ -138,7 +127,7 @@ def main():
         exit(1)
 
     print(f"Serving on https://{HOST}:{PORT} with standard TLS.")
-    print("Application payload is still RC4 encrypted.")
+    print("WARNING: Application payload RC4 keystream is RESET and REUSED ('many-time pad')!")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
