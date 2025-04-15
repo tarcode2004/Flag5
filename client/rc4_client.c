@@ -12,7 +12,7 @@ int main() {
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     int server_sock = -1;
-    const char *server_ip = "127.0.0.1"; 
+    const char *server_ip = "192.168.56.101"; 
 
     SSL_library_init();
     OpenSSL_add_all_algorithms();

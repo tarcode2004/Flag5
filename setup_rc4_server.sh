@@ -8,6 +8,35 @@ SERVER_SCRIPT="$SCRIPT_DIR/rc4_line_server.py"
 DATA_FILE="$SCRIPT_DIR/data.txt"
 CERT_DIR="$SCRIPT_DIR/certs"
 
+echo "[setup_rc4_server] Stopping conflicting services..."
+# Stop and disable Apache if it's installed
+if systemctl list-units --type=service | grep -q apache2; then
+    sudo systemctl stop apache2
+    sudo systemctl disable apache2
+fi
+
+# Stop any other services using port 443
+echo "[setup_rc4_server] Stopping any services using port 443..."
+sudo lsof -ti:443 | xargs -r sudo kill -9
+
+# Additional check for nginx
+if systemctl list-units --type=service | grep -q nginx; then
+    sudo systemctl stop nginx
+    sudo systemctl disable nginx
+fi
+
+# Additional check for lighttpd
+if systemctl list-units --type=service | grep -q lighttpd; then
+    sudo systemctl stop lighttpd
+    sudo systemctl disable lighttpd
+fi
+
+# Verify port 443 is free
+if sudo lsof -i:443; then
+    echo "[setup_rc4_server] Error: Port 443 is still in use after stopping services"
+    exit 1
+fi
+
 echo "[setup_rc4_server] Installing dependencies..."
 # Install Python and required packages
 sudo apt-get update
@@ -73,7 +102,7 @@ sudo systemctl start "$SERVICE_NAME"
 # Check service status
 if systemctl is-active --quiet "$SERVICE_NAME"; then
     echo "[setup_rc4_server] Service started successfully!"
-    echo "[setup_rc4_server] Server is running on https://localhost:8443"
+    echo "[setup_rc4_server] Server is running on https://localhost:443"
 else
     echo "[setup_rc4_server] Error: Service failed to start. Check status with:"
     echo "sudo systemctl status $SERVICE_NAME"
