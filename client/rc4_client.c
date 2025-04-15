@@ -8,6 +8,18 @@
 #include <stdio.h>
 #include <time.h>
 
+void ssl_keylog_callback(const SSL *ssl, const char *line) {
+    // Define the file path directly here or get it from an env var if preferred
+    const char *log_file_path = "/home/omnitech-admin/Desktop/sslkeylog.log"; 
+    FILE *fp = fopen(log_file_path, "a"); // Open in append mode
+    if (fp != NULL) {
+        fprintf(fp, "%s\n", line);
+        fclose(fp);
+    } else {
+        perror("Failed to open keylog file"); 
+    }
+}
+
 int main() {
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
@@ -29,6 +41,8 @@ int main() {
     SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);  // Only allow TLSv1.2
 
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+
+    SSL_CTX_set_keylog_callback(ctx, ssl_keylog_callback); 
 
     while(1) {
         SSL *ssl = NULL;
