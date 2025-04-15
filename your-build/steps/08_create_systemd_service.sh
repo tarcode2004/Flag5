@@ -12,6 +12,9 @@ SYSTEMD_SERVICE_FILE="/etc/systemd/system/${APACHE_SERVICE_NAME}.service"
 sudo mkdir -p "$APACHE_LOG_DIR"
 sudo chown -R root:root "$APACHE_LOG_DIR"
 sudo chmod 755 "$APACHE_LOG_DIR"
+sudo touch "$APACHE_LOG_DIR/httpd.pid"
+sudo chown root:root "$APACHE_LOG_DIR/httpd.pid"
+sudo chmod 644 "$APACHE_LOG_DIR/httpd.pid"
 
 sudo tee "$SYSTEMD_SERVICE_FILE" > /dev/null <<EOF
 [Unit]
@@ -25,6 +28,9 @@ PIDFile=${APACHE_LOG_DIR}/httpd.pid
 ExecStartPre=/bin/mkdir -p ${APACHE_LOG_DIR}
 ExecStartPre=/bin/chown root:root ${APACHE_LOG_DIR}
 ExecStartPre=/bin/chmod 755 ${APACHE_LOG_DIR}
+ExecStartPre=/bin/touch ${APACHE_LOG_DIR}/httpd.pid
+ExecStartPre=/bin/chown root:root ${APACHE_LOG_DIR}/httpd.pid
+ExecStartPre=/bin/chmod 644 ${APACHE_LOG_DIR}/httpd.pid
 ExecStart=${APACHE_PREFIX}/bin/apachectl -k start
 ExecReload=${APACHE_PREFIX}/bin/apachectl graceful
 ExecStop=${APACHE_PREFIX}/bin/apachectl -k stop

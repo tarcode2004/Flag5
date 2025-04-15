@@ -242,6 +242,11 @@ if ! grep -q "^ServerName" "$HTTPD_CONF"; then
     echo "ServerName localhost" | sudo tee -a "$HTTPD_CONF" > /dev/null
 fi
 
+# Set PID file location explicitly
+if ! grep -q "^PidFile" "$HTTPD_CONF"; then
+    echo "PidFile ${APACHE_LOG_DIR}/httpd.pid" | sudo tee -a "$HTTPD_CONF" > /dev/null
+fi
+
 # Test Apache configuration.
 echo "[07_configure_apache] Testing Apache configuration..."
 if sudo env LD_LIBRARY_PATH="$OPENSSL_PREFIX/lib" "$APACHE_PREFIX/bin/apachectl" configtest; then
