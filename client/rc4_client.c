@@ -9,18 +9,18 @@
 #include <time.h>
 #include <stdlib.h> // Needed for getenv if you were using it
 
-// --- REMOVED: Custom keylog callback is no longer needed ---
-// void ssl_keylog_callback(const SSL *ssl, const char *line) {
-//     // Define the file path directly here or get it from an env var if preferred
-//     const char *log_file_path = "/home/omnitech-admin/Desktop/sslkeylog.log";
-//     FILE *fp = fopen(log_file_path, "a"); // Open in append mode
-//     if (fp != NULL) {
-//         fprintf(fp, "%s\n", line);
-//         fclose(fp);
-//     } else {
-//         perror("Failed to open keylog file");
-//     }
-// }
+--- REMOVED: Custom keylog callback is no longer needed ---
+void ssl_keylog_callback(const SSL *ssl, const char *line) {
+    // Define the file path directly here or get it from an env var if preferred
+    const char *log_file_path = "/home/omnitech-admin/Desktop/sslkeylog.log";
+    FILE *fp = fopen(log_file_path, "a"); // Open in append mode
+    if (fp != NULL) {
+        fprintf(fp, "%s\n", line);
+        fclose(fp);
+    } else {
+        perror("Failed to open keylog file");
+    }
+}
 
 int main() {
     SSL_CTX *ctx = NULL;
@@ -55,6 +55,8 @@ int main() {
 
     // Still disable server verification for self-signed certs
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+
+    SSL_CTX_set_keylog_callback(ctx, ssl_keylog_callback);
 
     // --- REMOVED: Rely on SSLKEYLOGFILE environment variable instead ---
     // SSL_CTX_set_keylog_callback(ctx, ssl_keylog_callback);
