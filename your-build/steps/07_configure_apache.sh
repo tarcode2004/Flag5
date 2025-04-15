@@ -148,7 +148,7 @@ Listen 443
     SSLCertificateKeyFile "$SSL_KEY_FILE"
 
     SSLCipherSuite RC4-SHA
-    SSLProtocol all -SSLv3 -TLSv1.2 # Force TLSv1.0/1.1 for RC4
+    SSLProtocol all -SSLv3 -TLSv1.2
     SSLHonorCipherOrder on
     SSLSessionCache none # Disable session caching
     SSLSessionTickets Off # Disable session tickets
