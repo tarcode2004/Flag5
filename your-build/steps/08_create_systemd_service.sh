@@ -24,6 +24,8 @@ After=network.target remote-fs.target nss-lookup.target
 [Service]
 Type=forking
 Environment=LD_LIBRARY_PATH=${OPENSSL_PREFIX}/lib
+Environment=OPENSSL_CONF=${OPENSSL_PREFIX}/ssl/openssl.cnf
+Environment=MALLOC_CHECK_=0
 PIDFile=${APACHE_LOG_DIR}/httpd.pid
 ExecStartPre=/bin/mkdir -p ${APACHE_LOG_DIR}
 ExecStartPre=/bin/chown root:root ${APACHE_LOG_DIR}
@@ -39,6 +41,12 @@ Restart=on-failure
 RestartSec=5s
 PrivateTmp=true
 LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+LimitSTACK=infinity
+LimitCORE=infinity
+LimitRSS=infinity
+LimitAS=infinity
+LimitNPROC=infinity
 
 [Install]
 WantedBy=multi-user.target

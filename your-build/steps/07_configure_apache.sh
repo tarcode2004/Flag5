@@ -205,25 +205,25 @@ SSLSessionTickets Off
     SSLCertificateFile "$SSL_CRT_FILE"
     SSLCertificateKeyFile "$SSL_KEY_FILE"
 
+    # Simplified SSL configuration
     SSLCipherSuite RC4-SHA
     SSLProtocol all -SSLv3 -TLSv1.2
     SSLHonorCipherOrder on
 
-    # --- NEW: DirectoryIndex to allow accessing directory (optional) ---
-    # DirectoryIndex index.php index.html # Uncomment if needed
-    # --- END NEW ---
+    # Memory settings
+    RLimitMem 1048576
+    RLimitCPU 60
 
-    <Files ~ "\.(cgi|shtml|phtml|php[3-8]?)$"> # Updated regex for PHP
+    <Files ~ "\.(cgi|shtml|phtml|php[3-8]?)$">
         SSLOptions +StdEnvVars
     </Files>
     <Directory "/usr/local/apache2/cgi-bin">
         SSLOptions +StdEnvVars
     </Directory>
-    # --- NEW: Add PHP handler for .php files ---
+
     <FilesMatch \.php$>
         SetHandler application/x-httpd-php
     </FilesMatch>
-    # --- END NEW ---
 
     BrowserMatch "MSIE [2-5]" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
 
