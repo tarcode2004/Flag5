@@ -9,18 +9,19 @@ DATA_FILE="$SCRIPT_DIR/data.txt"
 CERT_DIR="$SCRIPT_DIR/certs"
 
 echo "[setup_rc4_server] Installing dependencies..."
-# Install Python and pip if not already installed
-if ! command -v python3 &> /dev/null; then
-    sudo apt-get update
-    sudo apt-get install -y python3 python3-pip python3-venv
-fi
+# Install Python and required packages
+sudo apt-get update
+sudo apt-get install -y python3 python3-pip python3-venv python3-cryptography
 
-# Ensure pip3 is installed and up to date
-sudo apt-get install -y python3-pip
-sudo pip3 install --upgrade pip
+# Create and activate a virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-# Install required Python packages
-sudo pip3 install pycryptodome
+# Install required Python packages in the virtual environment
+pip install pycryptodome
+
+# Deactivate virtual environment
+deactivate
 
 echo "[setup_rc4_server] Creating SSL certificates..."
 # Create certs directory if it doesn't exist
