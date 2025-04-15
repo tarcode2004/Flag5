@@ -87,7 +87,8 @@ echo "[setup_rc4_server] Building Python $PYTHON_VERSION with custom OpenSSL..."
 cd "$PYTHON_SRC_DIR"
 export CPPFLAGS="-I$OPENSSL_DIR/include"
 export LDFLAGS="-L$OPENSSL_DIR/lib"
-export LD_LIBRARY_PATH="/usr/local/ssl/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$OPENSSL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export PKG_CONFIG_PATH="$OPENSSL_DIR/lib/pkgconfig"
 
 ./configure \
     --prefix="$PYTHON_INSTALL_DIR" \
@@ -95,11 +96,25 @@ export LD_LIBRARY_PATH="/usr/local/ssl/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     --with-openssl-rpath=auto \
     --enable-optimizations
 
-make -j"$(nproc)"
+make -j"$(nproc)" || {
+    echo "[setup_rc4_server] Initial make failed, trying full clean rebuild..."
+    make clean
+    ./configure \
+        --prefix="$PYTHON_INSTALL_DIR" \
+        --with-openssl="$OPENSSL_DIR" \
+        --with-openssl-rpath=auto \
+        --enable-optimizations
+    make -j"$(nproc)"
+}
+
 sudo make altinstall
 
-echo "[setup_rc4_server] Verifying Python installation..."
-"$PYTHON_INSTALL_DIR/bin/python3.12" -m ssl | grep "OpenSSL"
+echo "[setup_rc4_server] Verifying Python installation has working SSL..."
+if ! "$PYTHON_INSTALL_DIR/bin/python3.12" -c "import ssl; print(ssl.OPENSSL_VERSION)"; then
+    echo "[setup_rc4_server] Error: _ssl module not built. Check OpenSSL paths and rebuild."
+    exit 1
+fi
+
 
 echo "[setup_rc4_server] Installing Python packages..."
 "$PYTHON_INSTALL_DIR/bin/pip3.12" install pycryptodome
