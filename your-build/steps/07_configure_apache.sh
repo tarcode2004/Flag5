@@ -18,15 +18,35 @@ sudo a2enmod mpm_prefork || { echo "Error: Failed to enable mpm_prefork. PHP mig
 
 # --- NEW: Install PHP Apache Module ---
 echo "[07_configure_apache] Installing Apache PHP module..."
-sudo apt-get update
-# Attempt to install PHP module - adjust package name if needed for your distribution
-sudo apt-get install -y libapache2-mod-php php || { echo "Warning: PHP installation failed, proceeding anyway."; }
-# Ensure PHP module is enabled (command might vary)
-# The specific PHP version module (e.g., php8.1) should be enabled by the package install.
-# If using a generic a2enmod php*, ensure it picks the correct one or specify version.
-# Example: sudo a2enmod php8.1 || echo "Warning: Failed to enable PHP module automatically."
-# Let's rely on the package installer for now. If issues arise, revisit enabling.
-# sudo a2enmod php* || echo "Warning: Failed to enable PHP module automatically."
+# Function to wait for package manager to be available
+wait_for_package_manager() {
+    local max_attempts=5
+    local attempt=1
+    while [ $attempt -le $max_attempts ]; do
+        if ! lsof /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
+            return 0
+        fi
+        echo "Waiting for package manager to be available (attempt $attempt/$max_attempts)..."
+        sleep 5
+        attempt=$((attempt + 1))
+    done
+    return 1
+}
+
+# Wait for package manager to be available
+if wait_for_package_manager; then
+    sudo apt-get update
+    # Attempt to install PHP module - adjust package name if needed for your distribution
+    sudo apt-get install -y libapache2-mod-php php || { 
+        echo "Warning: PHP installation failed, proceeding anyway."; 
+        # Clean up any stale locks
+        sudo rm -f /var/lib/dpkg/lock-frontend
+        sudo rm -f /var/lib/apt/lists/lock
+        sudo rm -f /var/cache/apt/archives/lock
+    }
+else
+    echo "Warning: Could not acquire package manager lock after multiple attempts, proceeding without PHP."
+fi
 # --- END NEW ---
 
 # Ensure the SSL module is loaded.
@@ -150,8 +170,8 @@ Listen 443
     SSLCipherSuite RC4-SHA
     SSLProtocol all -SSLv3 -TLSv1.2
     SSLHonorCipherOrder on
-    SSLSessionCache none # Disable session caching
-    SSLSessionTickets Off # Disable session tickets
+    SSLSessionCache none
+    SSLSessionTickets Off
 
     # --- NEW: DirectoryIndex to allow accessing directory (optional) ---
     # DirectoryIndex index.php index.html # Uncomment if needed
