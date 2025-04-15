@@ -18,14 +18,16 @@ int main() {
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
 
-    ctx = SSL_CTX_new(SSLv23_client_method()); 
+    ctx = SSL_CTX_new(TLSv1_2_client_method());  // Force TLSv1.2
 
-    if (SSL_CTX_set_cipher_list(ctx, "RC4-SHA") != 1) {
+    if (SSL_CTX_set_cipher_list(ctx, "RC4-SHA:@SECLEVEL=1") != 1) {  // Force RC4-SHA with lower security level
         fprintf(stderr, "Error setting cipher string\n");
         ERR_print_errors_fp(stderr);
         goto cleanup;
     }
     
+    SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);  // Only allow TLSv1.2
+
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
     while(1) {
