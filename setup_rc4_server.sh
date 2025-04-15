@@ -12,8 +12,12 @@ echo "[setup_rc4_server] Installing dependencies..."
 # Install Python and pip if not already installed
 if ! command -v python3 &> /dev/null; then
     sudo apt-get update
-    sudo apt-get install -y python3 python3-pip
+    sudo apt-get install -y python3 python3-pip python3-venv
 fi
+
+# Ensure pip3 is installed and up to date
+sudo apt-get install -y python3-pip
+sudo pip3 install --upgrade pip
 
 # Install required Python packages
 sudo pip3 install pycryptodome
