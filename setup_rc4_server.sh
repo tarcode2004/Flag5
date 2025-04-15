@@ -65,7 +65,10 @@ fi
 echo "[setup_rc4_server] Installing dependencies..."
 # Install Python and required packages
 sudo apt-get update
-sudo apt-get install -y python3 python3-pip python3-venv python3-cryptography python3-crypto
+sudo apt-get install -y python3 python3-pip python3-venv python3-cryptography
+
+# Install pycryptodome in the system Python environment
+sudo pip3 install --break-system-packages pycryptodome
 
 echo "[setup_rc4_server] Creating SSL certificates..."
 # Create certs directory if it doesn't exist
