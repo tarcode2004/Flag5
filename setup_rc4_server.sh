@@ -87,7 +87,7 @@ echo "[setup_rc4_server] Building Python $PYTHON_VERSION with custom OpenSSL..."
 cd "$PYTHON_SRC_DIR"
 export CPPFLAGS="-I$OPENSSL_DIR/include"
 export LDFLAGS="-L$OPENSSL_DIR/lib"
-export LD_LIBRARY_PATH="$OPENSSL_DIR/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/local/ssl/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 ./configure \
     --prefix="$PYTHON_INSTALL_DIR" \
