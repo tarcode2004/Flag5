@@ -141,12 +141,27 @@ TEMP_SSL_CONF="/tmp/openssl.cnf"
 # Create temporary OpenSSL configuration
 cat > "$TEMP_SSL_CONF" << 'EOF'
 [req]
-distinguished_name=req_distinguished_name
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
 [req_distinguished_name]
-[v3_ca]
-basicConstraints=CA:FALSE
-keyUsage=digitalSignature,keyEncipherment
-extendedKeyUsage=serverAuth
+C = US
+ST = CTFState
+L = CTFCity
+O = OmniTech
+OU = AIDivision
+CN = localhost
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+IP.1 = 127.0.0.1
 EOF
 
 # Always regenerate certificates to ensure proper configuration
@@ -155,9 +170,8 @@ sudo rm -f "$SSL_KEY_FILE" "$SSL_CRT_FILE"
 sudo "$OPENSSL_PREFIX/bin/openssl" req -x509 -nodes -days 3650 -newkey rsa:2048 \
   -keyout "$SSL_KEY_FILE" \
   -out "$SSL_CRT_FILE" \
-  -subj "/C=US/ST=CTFState/L=CTFCity/O=OmniTech/OU=AIDivision/CN=localhost" \
-  -extensions v3_ca \
-  -config "$TEMP_SSL_CONF"
+  -config "$TEMP_SSL_CONF" \
+  -extensions v3_req
 sudo chmod 600 "$SSL_KEY_FILE"
 
 # Clean up temporary config
