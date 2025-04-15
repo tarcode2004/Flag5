@@ -137,16 +137,27 @@ SSL_CERT_DIR="$APACHE_PREFIX/conf/ssl"
 SSL_KEY_FILE="$SSL_CERT_DIR/server.key"
 SSL_CRT_FILE="$SSL_CERT_DIR/server.crt"
 
-# Check if certs already exist
-if [ ! -f "$SSL_KEY_FILE" ] || [ ! -f "$SSL_CRT_FILE" ]; then
-    echo "[07_configure_apache] Generating self-signed certificate..."
-    sudo "$OPENSSL_PREFIX/bin/openssl" req -x509 -nodes -days 3650 -newkey rsa:2048 \
-      -keyout "$SSL_KEY_FILE" \
-      -out "$SSL_CRT_FILE" \
-      -subj "/C=US/ST=CTFState/L=CTFCity/O=OmniTech/OU=AIDivision/CN=localhost"
-    sudo chmod 600 "$SSL_KEY_FILE"
-else
-    echo "[07_configure_apache] SSL certificates already exist, skipping generation."
+# Always regenerate certificates to ensure proper configuration
+echo "[07_configure_apache] Generating self-signed certificate..."
+sudo rm -f "$SSL_KEY_FILE" "$SSL_CRT_FILE"
+sudo "$OPENSSL_PREFIX/bin/openssl" req -x509 -nodes -days 3650 -newkey rsa:2048 \
+  -keyout "$SSL_KEY_FILE" \
+  -out "$SSL_CRT_FILE" \
+  -subj "/C=US/ST=CTFState/L=CTFCity/O=OmniTech/OU=AIDivision/CN=localhost" \
+  -extensions v3_ca \
+  -config <(echo "[req]
+distinguished_name=req_distinguished_name
+[req_distinguished_name]
+[v3_ca]
+basicConstraints=CA:FALSE
+keyUsage=digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth")
+sudo chmod 600 "$SSL_KEY_FILE"
+
+# Verify the certificate is properly configured
+if ! sudo "$OPENSSL_PREFIX/bin/openssl" x509 -in "$SSL_CRT_FILE" -text -noout | grep -q "CA:FALSE"; then
+    echo "[!] Certificate verification failed. Please check the certificate configuration."
+    exit 1
 fi
 
 # Write the SSL configuration.
