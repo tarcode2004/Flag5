@@ -63,7 +63,7 @@ int main() {
         // printf("SSL Handshake successful. Cipher: %s\n", SSL_get_cipher(ssl)); // Optional
 
         // --- MODIFIED: Request the PHP script ---
-        const char *http_request = "GET /satellite_uplink_status.php HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
+        const char *http_request = "GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
         // --- END MODIFIED ---
         
         SSL_write(ssl, http_request, strlen(http_request));
