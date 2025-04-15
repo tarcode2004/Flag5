@@ -154,6 +154,10 @@ SSL_CONF_FILE="$APACHE_PREFIX/conf/extra/httpd-ssl.conf"
 sudo tee "$SSL_CONF_FILE" > /dev/null <<EOF
 Listen 443
 
+# Global SSL session cache settings
+SSLSessionCache none
+SSLSessionTickets Off
+
 <VirtualHost _default_:443>
     DocumentRoot "$DOCUMENT_ROOT"
     ServerName localhost
@@ -170,8 +174,6 @@ Listen 443
     SSLCipherSuite RC4-SHA
     SSLProtocol all -SSLv3 -TLSv1.2
     SSLHonorCipherOrder on
-    SSLSessionCache none
-    SSLSessionTickets Off
 
     # --- NEW: DirectoryIndex to allow accessing directory (optional) ---
     # DirectoryIndex index.php index.html # Uncomment if needed
