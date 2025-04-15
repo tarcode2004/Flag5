@@ -7,7 +7,7 @@ import os
 import base64
 
 # Configuration
-HOST = 'localhost'
+HOST = '0.0.0.0'
 PORT = 443
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CERTFILE = os.path.join(SCRIPT_DIR, 'certs', 'server.crt')
