@@ -8,6 +8,11 @@ OPENSSL_PREFIX="/usr/local/ssl"
 echo "[08_create_systemd_service] Creating systemd service file..."
 SYSTEMD_SERVICE_FILE="/etc/systemd/system/${APACHE_SERVICE_NAME}.service"
 
+# Ensure PID directory exists and has proper permissions
+sudo mkdir -p "$APACHE_LOG_DIR"
+sudo chown -R root:root "$APACHE_LOG_DIR"
+sudo chmod 755 "$APACHE_LOG_DIR"
+
 sudo tee "$SYSTEMD_SERVICE_FILE" > /dev/null <<EOF
 [Unit]
 Description=The Apache HTTP Server (Custom Build with Old OpenSSL)
@@ -17,6 +22,9 @@ After=network.target remote-fs.target nss-lookup.target
 Type=forking
 Environment=LD_LIBRARY_PATH=${OPENSSL_PREFIX}/lib
 PIDFile=${APACHE_LOG_DIR}/httpd.pid
+ExecStartPre=/bin/mkdir -p ${APACHE_LOG_DIR}
+ExecStartPre=/bin/chown root:root ${APACHE_LOG_DIR}
+ExecStartPre=/bin/chmod 755 ${APACHE_LOG_DIR}
 ExecStart=${APACHE_PREFIX}/bin/apachectl -k start
 ExecReload=${APACHE_PREFIX}/bin/apachectl graceful
 ExecStop=${APACHE_PREFIX}/bin/apachectl -k stop
