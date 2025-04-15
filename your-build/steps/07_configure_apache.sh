@@ -8,13 +8,25 @@ OPENSSL_PREFIX="/usr/local/ssl"
 
 echo "[07_configure_apache] Configuring Apache for SSL only (no HTTP) and PHP..."
 
+# --- NEW: Switch Apache MPM to prefork for non-ZTS PHP compatibility ---
+echo "[07_configure_apache] Switching Apache MPM to prefork..."
+# Disable threaded MPMs (worker/event) - ignore errors if they aren't enabled
+sudo a2dismod mpm_event mpm_worker || true
+# Enable the non-threaded prefork MPM
+sudo a2enmod mpm_prefork || { echo "Error: Failed to enable mpm_prefork. PHP might be unstable."; exit 1; }
+# --- END NEW ---
+
 # --- NEW: Install PHP Apache Module ---
 echo "[07_configure_apache] Installing Apache PHP module..."
 sudo apt-get update
 # Attempt to install PHP module - adjust package name if needed for your distribution
 sudo apt-get install -y libapache2-mod-php php || { echo "Warning: PHP installation failed, proceeding anyway."; }
 # Ensure PHP module is enabled (command might vary)
-sudo a2enmod php* || echo "Warning: Failed to enable PHP module automatically."
+# The specific PHP version module (e.g., php8.1) should be enabled by the package install.
+# If using a generic a2enmod php*, ensure it picks the correct one or specify version.
+# Example: sudo a2enmod php8.1 || echo "Warning: Failed to enable PHP module automatically."
+# Let's rely on the package installer for now. If issues arise, revisit enabling.
+# sudo a2enmod php* || echo "Warning: Failed to enable PHP module automatically."
 # --- END NEW ---
 
 # Ensure the SSL module is loaded.
