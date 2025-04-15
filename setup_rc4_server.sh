@@ -72,15 +72,15 @@ sudo pip3 install --break-system-packages pycryptodome
 
 echo "[setup_rc4_server] Creating SSL certificates..."
 # Create certs directory if it doesn't exist
-mkdir -p "$CERT_DIR"
+sudo mkdir -p "$CERT_DIR"
 
 # Generate self-signed certificate if it doesn't exist
 if [ ! -f "$CERT_DIR/server.crt" ] || [ ! -f "$CERT_DIR/server.key" ]; then
-    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+    sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
         -keyout "$CERT_DIR/server.key" \
         -out "$CERT_DIR/server.crt" \
         -subj "/C=US/ST=CTFState/L=CTFCity/O=OmniTech/OU=AIDivision/CN=localhost"
-    chmod 600 "$CERT_DIR/server.key"
+    sudo chmod 600 "$CERT_DIR/server.key"
 fi
 
 echo "[setup_rc4_server] Creating systemd service..."
@@ -92,7 +92,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=$(whoami)
+User=root
+Group=root
 WorkingDirectory=$SCRIPT_DIR
 ExecStart=/usr/bin/python3 $SERVER_SCRIPT
 Restart=always
@@ -105,11 +106,11 @@ EOF
 
 echo "[setup_rc4_server] Setting up permissions..."
 # Ensure the server script is executable
-chmod +x "$SERVER_SCRIPT"
+sudo chmod +x "$SERVER_SCRIPT"
 
 # Create line index file if it doesn't exist
-touch "$SCRIPT_DIR/line_index.txt"
-chmod 644 "$SCRIPT_DIR/line_index.txt"
+sudo touch "$SCRIPT_DIR/line_index.txt"
+sudo chmod 644 "$SCRIPT_DIR/line_index.txt"
 
 echo "[setup_rc4_server] Enabling and starting service..."
 # Reload systemd and enable/start the service
