@@ -136,6 +136,18 @@ EOF
 SSL_CERT_DIR="$APACHE_PREFIX/conf/ssl"
 SSL_KEY_FILE="$SSL_CERT_DIR/server.key"
 SSL_CRT_FILE="$SSL_CERT_DIR/server.crt"
+TEMP_SSL_CONF="/tmp/openssl.cnf"
+
+# Create temporary OpenSSL configuration
+cat > "$TEMP_SSL_CONF" << 'EOF'
+[req]
+distinguished_name=req_distinguished_name
+[req_distinguished_name]
+[v3_ca]
+basicConstraints=CA:FALSE
+keyUsage=digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+EOF
 
 # Always regenerate certificates to ensure proper configuration
 echo "[07_configure_apache] Generating self-signed certificate..."
@@ -145,14 +157,11 @@ sudo "$OPENSSL_PREFIX/bin/openssl" req -x509 -nodes -days 3650 -newkey rsa:2048 
   -out "$SSL_CRT_FILE" \
   -subj "/C=US/ST=CTFState/L=CTFCity/O=OmniTech/OU=AIDivision/CN=localhost" \
   -extensions v3_ca \
-  -config <(echo "[req]
-distinguished_name=req_distinguished_name
-[req_distinguished_name]
-[v3_ca]
-basicConstraints=CA:FALSE
-keyUsage=digitalSignature,keyEncipherment
-extendedKeyUsage=serverAuth")
+  -config "$TEMP_SSL_CONF"
 sudo chmod 600 "$SSL_KEY_FILE"
+
+# Clean up temporary config
+rm -f "$TEMP_SSL_CONF"
 
 # Verify the certificate is properly configured
 if ! sudo "$OPENSSL_PREFIX/bin/openssl" x509 -in "$SSL_CRT_FILE" -text -noout | grep -q "CA:FALSE"; then
